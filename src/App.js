@@ -1,23 +1,20 @@
 import React, { useState } from "react";
-import "./App.css";
+import SearchCity from "./components/Request";
+import ButtonCity from "./components/ButtonCity";
+import TableWeather from "./components/TableWeather";
 import { Container } from "@material-ui/core";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Table, Button, FormControl, Navbar, Form, Nav } from "react-bootstrap";
+import { Button, FormControl, Navbar, Form, Nav } from "react-bootstrap";
 
 function App() {
   const [value, setValue] = useState({});
-  const [loadind, setLoadind] = useState(false);
-  const [state, setState] = useState({ target: { value: "" } });
+  const [loading, setLoading] = useState(false);
+  const [state, setState] = useState("");
   const [message, setMessage] = useState("");
+  const cityButton = ["Letava", "Kyiv", "London", "New York"];
 
-  async function add(city) {
-    //console.log(city.target.value);
-    let response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${city.target.value}&appid=c2dcf8ffb5cdc3f8977bfd2ae7ea4738&units=metric`
-    );
-    let data = await response.json();
-    console.log(data);
-
+  async function apply(city) {
+    let data = await SearchCity(city);
     if (data.cod === 200) {
       setValue({
         city: data.name,
@@ -27,18 +24,17 @@ function App() {
         windSpeed: data.wind.speed,
         windDeg: data.wind.deg,
       });
-      setLoadind(true);
-    } else if (data.cod === "404") {
+      setLoading(true);
+    } else {
       setMessage(data.message);
-      setLoadind(false);
+      setLoading(false);
     }
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    //console.log(state.target.value);
-    add(state);
-    setState({ term: "" });
+    apply(state);
+    setState("");
   };
 
   return (
@@ -51,8 +47,8 @@ function App() {
             type="text"
             placeholder="Search"
             className="mr-sm-2"
-            value={state.term}
-            onChange={(e) => setState({ target: { value: e.target.value } })}
+            value={state}
+            onChange={(e) => setState(e.target.value)}
           />
           <Button variant="outline-secondary" type="submit">
             Search
@@ -60,52 +56,12 @@ function App() {
         </Form>
       </Navbar>
       <br />
-      <Button variant="outline-secondary" onClick={add} value="Kyiv">
-        Kyiv
-      </Button>{" "}
-      <Button variant="outline-secondary" onClick={add} value="London">
-        London
-      </Button>{" "}
-      <Button variant="outline-secondary" onClick={add} value="New York">
-        New York
-      </Button>{" "}
+      {cityButton.map((city, i) => (
+        <ButtonCity onChanged={apply} value={city} key={i} />
+      ))}
       <br />
-      {loadind ? (
-        <>
-          <br />
-          <Table striped bordered hover>
-            <thead>
-              <tr>
-                <th>{value.city}</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Temperature</td>
-                <td>{value.temp} °C</td>
-              </tr>
-              <tr>
-                <td>Atmospheric pressure</td>
-                <td>{value.pressure} hPa</td>
-              </tr>
-              <tr>
-                <td>Humidity</td>
-                <td>{value.humidity} %</td>
-              </tr>
-              <tr>
-                <td>Wind speed</td>
-                <td>
-                  {value.pressure} {value.windSpeed} meter/sec
-                </td>
-              </tr>
-              <tr>
-                <td>Wind direction</td>
-                <td>{value.windDeg} °</td>
-              </tr>
-            </tbody>
-          </Table>
-        </>
+      {loading ? (
+        <TableWeather value={value} />
       ) : (
         <>
           <br />
