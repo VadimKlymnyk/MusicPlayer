@@ -1,39 +1,29 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { connect } from "react-redux";
+
 import SearchCity from "./components/Request";
 import ButtonCity from "./components/ButtonCity";
 import TableWeather from "./components/TableWeather";
+import Loader from "./components/Loading";
 import { Container } from "@material-ui/core";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, FormControl, Navbar, Form, Nav } from "react-bootstrap";
 
-function App() {
-  const [value, setValue] = useState({});
-  const [loading, setLoading] = useState(false);
+function App(props) {
   const [state, setState] = useState("");
-  const [message, setMessage] = useState("");
   const cityButton = ["Letava", "Kyiv", "London", "New York"];
 
+  useEffect(() => {
+    apply("Letava");
+  }, []);
+
   async function apply(city) {
-    let data = await SearchCity(city);
-    if (data.cod === 200) {
-      setValue({
-        city: data.name,
-        temp: data.main.temp,
-        pressure: data.main.pressure,
-        humidity: data.main.humidity,
-        windSpeed: data.wind.speed,
-        windDeg: data.wind.deg,
-      });
-      setLoading(true);
-    } else {
-      setMessage(data.message);
-      setLoading(false);
-    }
+    props.getWeather(city);
   }
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    apply(state);
+    if (state !== "") apply(state);
     setState("");
   };
 
@@ -60,16 +50,39 @@ function App() {
         <ButtonCity onChanged={apply} value={city} key={i} />
       ))}
       <br />
-      {loading ? (
-        <TableWeather value={value} />
-      ) : (
+      {!props.loading && props.error === null && (
+        <TableWeather value={props.weather} />
+      )}
+      {props.error !== null && (
         <>
           <br />
-          <h1>{message}</h1>
+          <h1>City not found</h1>
+        </>
+      )}
+      {props.loading && (
+        <>
+          <br />
+          <Loader />
         </>
       )}
     </Container>
   );
 }
 
-export default App;
+const mapStateToProps = ({ getWeather }) => {
+  return {
+    weather: getWeather.data,
+    loading: getWeather.loading,
+    error: getWeather.error,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    getWeather: (city) => {
+      SearchCity(dispatch, city);
+    },
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
