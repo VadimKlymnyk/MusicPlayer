@@ -13,8 +13,22 @@ function getWeather(state = { data: [], error: null, loading: true }, action) {
   }
 }
 
+function getWeatherFive(state = { data: [], error: null, loading: true }, action) {
+    switch (action.type) {
+      case "GET_WEATHER_FIVE":
+        return { ...state, loading: true };
+      case "GET_WEATHER_FIVE_SUCCESS":
+        return { ...state, loading: false, data: action.data , error: null};
+      case "GET_WEATHER_FIVE_ERROR":
+        return { ...state, loading: false, error: action.error };
+      default:
+        return state;
+    }
+  }
+
 const reducers = combineReducers({
   getWeather,
+  getWeatherFive
 });
 
 let store = createStore(reducers);

@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 
-import SearchCity from "./components/Request";
+import {SearchCity} from "./components/Request";
 import ButtonCity from "./components/ButtonCity";
 import TableWeather from "./components/TableWeather";
 import Loader from "./components/Loading";
+import FiveDay from "./components/FiveDay";
 import { Container } from "@material-ui/core";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Button, FormControl, Navbar, Form, Nav } from "react-bootstrap";
 
 function App(props) {
   const [state, setState] = useState("");
+  const [city, setCity] = useState("Letava");
   const cityButton = ["Letava", "Kyiv", "London", "New York"];
 
   useEffect(() => {
@@ -18,7 +20,8 @@ function App(props) {
   }, []);
 
   async function apply(city) {
-    props.getWeather(city);
+    setCity(city)
+    props.chooseCity(city);
   }
 
   const handleSubmit = (e) => {
@@ -65,6 +68,8 @@ function App(props) {
           <Loader />
         </>
       )}
+
+      <FiveDay city={city} />
     </Container>
   );
 }
@@ -79,7 +84,7 @@ const mapStateToProps = ({ getWeather }) => {
 
 const mapDispatchToProps = (dispatch) => {
   return {
-    getWeather: (city) => {
+    chooseCity: (city) => {
       SearchCity(dispatch, city);
     },
   };

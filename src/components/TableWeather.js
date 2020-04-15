@@ -9,7 +9,7 @@ function TableWeather({ value }) {
       <Table striped bordered hover>
         <thead>
           <tr>
-            <th>{value.name}</th>
+            <th>Weather in {value.name} today</th>
             <th></th>
           </tr>
         </thead>
